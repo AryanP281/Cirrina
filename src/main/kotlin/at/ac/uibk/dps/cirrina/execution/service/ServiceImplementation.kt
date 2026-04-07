@@ -54,7 +54,7 @@ class HttpServiceImplementation(
   override suspend fun invoke(input: List<ContextVariable>): List<ContextVariable> {
     require(input.none { it.isLazy }) { "all variables must be evaluated before conversion" }
 
-    val payload = Serializer.serialize(input)
+    val payload = Serializer.serializeList(input)
     val uri = URI(scheme, null, host, port, endPoint, null, null)
 
     val request =
@@ -81,7 +81,8 @@ class HttpServiceImplementation(
     if (body == null || body.isEmpty()) return emptyList()
 
     return try {
-      Serializer.deserialize(body)
+      Serializer.deserializeList<ContextVariable>(body, ContextVariable::class.java)
+        as List<ContextVariable>
     } catch (_: InvalidProtocolBufferException) {
       error("unexpected http service response format")
     }

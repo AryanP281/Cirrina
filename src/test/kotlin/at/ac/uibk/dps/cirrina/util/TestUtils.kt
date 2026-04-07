@@ -18,11 +18,15 @@ object TestUtils {
     val httpServer = HttpServer.create(InetSocketAddress(8000), 0)
 
     httpServer.createContext("/increment") { exchange ->
-      val input: List<ContextVariable> = Serializer.deserialize(exchange.requestBody.readAllBytes())
+      val input: List<ContextVariable> =
+        Serializer.deserializeList<ContextVariable>(
+          exchange.requestBody.readAllBytes(),
+          ContextVariable::class.java,
+        )
 
       val output = handlerBlock(input)
 
-      val out = Serializer.serialize(output)
+      val out = Serializer.serializeList(output)
 
       exchange.sendResponseHeaders(200, out.size.toLong())
       exchange.responseBody.use { stream -> stream.write(out) }

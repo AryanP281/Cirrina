@@ -71,7 +71,7 @@ class EventHandler : AutoCloseable {
     if (event.channel != Csml.EventChannel.EXTERNAL) return
 
     val publisher = publishers[event.topic] ?: error("no publisher for topic '${event.topic}'")
-    val payload = ZBytes.from(Serializer.serialize(event))
+    val payload = ZBytes.from(Serializer.serializeValues(event))
 
     publisher.put(payload).onFailure { error("failed to send event '$event'") }
   }
@@ -106,7 +106,7 @@ class EventHandler : AutoCloseable {
 
   private fun handleIncoming(sample: Sample) {
     try {
-      val event = Serializer.deserialize<Event>(sample.payload.toBytes())
+      val event = Serializer.deserializeValues<Event>(sample.payload.toBytes(), Event::class.java)
       propagate(event)
     } catch (e: Exception) {
       error("failed to handle sample from '${sample.keyExpr}': ${e.message}")

@@ -45,10 +45,15 @@ class ServiceImplementationTest {
     @JvmStatic @AfterAll fun tearDown() = httpServer.stop(0)
 
     private fun HttpExchange.readVariables(): List<ContextVariable> =
-      requestBody.use { stream -> Serializer.deserialize(stream.readAllBytes()) }
+      requestBody.use { stream ->
+        Serializer.deserializeList<ContextVariable>(
+          stream.readAllBytes(),
+          ContextVariable::class.java,
+        )
+      }
 
     private fun HttpExchange.sendVariables(variables: List<ContextVariable>) =
-      Serializer.serialize(variables).let { bytes ->
+      Serializer.serializeList(variables).let { bytes ->
         sendResponseHeaders(200, bytes.size.toLong())
         responseBody.use { it.write(bytes) }
       }

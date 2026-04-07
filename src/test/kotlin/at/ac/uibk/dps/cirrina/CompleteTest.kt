@@ -70,13 +70,26 @@ class CompleteTest {
   @Test
   fun testSerialization() {
     val intVal = 123
-    assertEquals(intVal, Serializer.deserialize(Serializer.serialize(intVal)))
+    assertEquals(
+      intVal,
+      Serializer.deserializeValues(Serializer.serializeValues(intVal), Int::class.java),
+    )
 
     val stringVal = "test"
-    assertEquals(stringVal, Serializer.deserialize<String>(Serializer.serialize(stringVal)))
+    assertEquals(
+      stringVal,
+      Serializer.deserializeValues<String>(
+        Serializer.serializeValues(stringVal),
+        String::class.java,
+      ),
+    )
 
     val cv = ContextVariable("testVar", 456)
-    val cvParsed = Serializer.deserialize<ContextVariable>(Serializer.serialize(cv))
+    val cvParsed =
+      Serializer.deserializeValues<ContextVariable>(
+        Serializer.serializeValues(cv),
+        ContextVariable::class.java,
+      )
     assertEquals(cv.name, cvParsed.name)
     assertEquals(cv.value, cvParsed.value)
 
@@ -91,7 +104,8 @@ class CompleteTest {
         emittedTime = 1L,
       )
 
-    val eventParsed = Serializer.deserialize<Event>(Serializer.serialize(event))
+    val eventParsed =
+      Serializer.deserializeValues<Event>(Serializer.serializeValues(event), Event::class.java)
     assertEquals(event.topic, eventParsed.topic)
     assertEquals(event.channel, eventParsed.channel)
     assertEquals(1, eventParsed.data.size)
@@ -99,9 +113,49 @@ class CompleteTest {
     assertEquals("source", eventParsed.source)
 
     val complexMap = mapOf("key" to listOf(1, 2, 3), "active" to true)
-    val mapParsed = Serializer.deserialize<Map<String, Any>>(Serializer.serialize(complexMap))
+    val mapParsed =
+      Serializer.deserializeValues<Map<String, Any>>(
+        Serializer.serializeValues(complexMap),
+        Map::class.java as Class<Map<String, Any>>,
+      )
     assertEquals(complexMap, mapParsed)
     assertEquals(3, (mapParsed["key"] as List<*>).size)
+
+    val cvList: List<ContextVariable> =
+      listOf(ContextVariable("testVar2", 456), ContextVariable("testVar2", 457))
+    val cvListParsed =
+      Serializer.deserializeList(Serializer.serializeList(cvList), ContextVariable::class.java)
+    assertEquals(cvList, cvListParsed)
+
+    val eventList: List<Event> =
+      listOf(
+        Event(
+          topic = "testEvent1",
+          channel = Csml.EventChannel.PERIPHERAL,
+          data = listOf(cv),
+          target = "target",
+          source = "source",
+          id = "someId1",
+          emittedTime = 1L,
+        ),
+        Event(
+          topic = "testEvent2",
+          channel = Csml.EventChannel.PERIPHERAL,
+          data = listOf(cv),
+          target = "target",
+          source = "source",
+          id = "someId2",
+          emittedTime = 2L,
+        ),
+      )
+    val eventListParsed =
+      Serializer.deserializeList(Serializer.serializeList(eventList), Event::class.java)
+    assertEquals(eventList, eventListParsed)
+
+    val emptyList: List<ContextVariable> = ArrayList()
+    val emptyListParsed =
+      Serializer.deserializeList(Serializer.serializeList(emptyList), ContextVariable::class.java)
+    assertEquals(0, emptyListParsed.size)
   }
 
   @Test

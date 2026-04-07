@@ -89,9 +89,9 @@ class ContextEtcd(endpoints: List<String>) : Context {
 
   private fun String.toByteSequence() = ByteSequence.from(this, StandardCharsets.UTF_8)
 
-  private fun Any.toBytes(): ByteArray = Serializer.serialize(this)
+  private fun Any.toBytes(): ByteArray = Serializer.serializeValues(this)
 
-  private fun ByteArray.fromBytes(): Any = Serializer.deserialize(this)
+  private fun ByteArray.fromBytes(): Any = Serializer.deserializeValues(this, Any::class.java)
 
   override fun close() {
     client.close()
