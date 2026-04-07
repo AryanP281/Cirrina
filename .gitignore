@@ -3,6 +3,7 @@ bin/
 .idea/
 .gradle/
 .kotlin/
+.venvs/
 
 build/
 
