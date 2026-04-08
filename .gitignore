@@ -1,17 +1,2 @@
-bin/
-
-.idea/
-.gradle/
-.kotlin/
-.venvs/
-
-build/
-
-*.puml
-
-package.json
-package-lock.json
-node_modules/
-
-!metrics/.gitkeep
-metrics/*
+# Created by venv; see https://docs.python.org/3/library/venv.html
+*

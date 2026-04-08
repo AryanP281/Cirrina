@@ -12,7 +12,7 @@ import org.apache.fory.memory.MemoryBuffer
 
 object Serializer {
   private val fory: ThreadSafeFory =
-    Fory.builder().withLanguage(Language.JAVA).buildThreadSafeFory().apply {
+    Fory.builder().withLanguage(Language.XLANG).buildThreadSafeFory().apply {
       register(ContextVariableFdl.ContextVariable::class.java)
       register(EventFdl.Event::class.java)
       register(EventFdl.EventChannel::class.java)
