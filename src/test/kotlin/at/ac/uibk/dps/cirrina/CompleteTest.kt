@@ -168,6 +168,14 @@ class CompleteTest {
     val emptyListParsed =
       Serializer.deserializeList(Serializer.serializeList(emptyList), ContextVariable::class.java)
     assertEquals(0, emptyListParsed.size)
+
+    val testArray = arrayOf(1, 2, 3)
+    val testArrayParsed =
+      Serializer.deserializeValues(Serializer.serializeValues(testArray), Array::class.java)
+    assertEquals(testArray.size, testArrayParsed.size)
+    for (i in testArray.indices) {
+      assertEquals(testArray[i], testArrayParsed[i])
+    }
   }
 
   @Test
