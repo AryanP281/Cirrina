@@ -76,19 +76,12 @@ sourceSets {
 
       srcDir("build/generated/fory/foryGenJava/java")
     }
-    java { srcDir("build/generated/fory/foryGenJava/java") }
+    java { srcDir("src/main/java") }
   }
 }
 
 tasks.register("generateForyTypes", Exec::class.java) {
-  commandLine(
-    ".venvs/bin/foryc",
-    "--lang",
-    "java",
-    "-o",
-    "./build/generated/fory/foryGenJava",
-    "./fdl/ForyDescriptors.fdl",
-  )
+  commandLine(".venvs/bin/foryc", "--lang", "java", "-o", "./src/main", "./fdl/ForyDescriptors.fdl")
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
@@ -98,7 +91,7 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
   }
 }
 
-tasks.compileKotlin { dependsOn(tasks.ktfmtFormat, tasks.named("generateForyTypes")) }
+tasks.compileKotlin { dependsOn(tasks.ktfmtFormat) }
 
 tasks.test {
   useJUnitPlatform()
