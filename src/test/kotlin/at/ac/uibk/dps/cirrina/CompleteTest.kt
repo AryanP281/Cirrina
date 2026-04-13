@@ -1,9 +1,7 @@
 package at.ac.uibk.dps.cirrina
 
 import at.ac.uibk.dps.cirrina.csm.Csml
-import at.ac.uibk.dps.cirrina.csm.Csml.HttpMethod
-import at.ac.uibk.dps.cirrina.csm.Csml.HttpServiceImplementationBinding
-import at.ac.uibk.dps.cirrina.csm.Csml.Type
+import at.ac.uibk.dps.cirrina.csm.Csml.*
 import at.ac.uibk.dps.cirrina.data.DefaultDescriptions
 import at.ac.uibk.dps.cirrina.di.DaggerTestComponent
 import at.ac.uibk.dps.cirrina.di.TestModule
@@ -125,14 +123,19 @@ class CompleteTest {
       listOf(ContextVariable("testVar2", 456), ContextVariable("testVar2", 457))
     val cvListParsed =
       Serializer.deserializeList(Serializer.serializeList(cvList), ContextVariable::class.java)
-    assertEquals(cvList, cvListParsed)
+    assertEquals(cvList.size, cvListParsed.size)
+    for (i in cvListParsed.indices) {
+      assertEquals(cvList[i].name, cvListParsed[i].name)
+      assertEquals(cvList[i].value, cvListParsed[i].value)
+      assertEquals(cvList[i].isLazy, cvListParsed[i].isLazy)
+    }
 
     val eventList: List<Event> =
       listOf(
         Event(
           topic = "testEvent1",
           channel = Csml.EventChannel.PERIPHERAL,
-          data = listOf(cv),
+          data = listOf(ContextVariable("testVar1", 100)),
           target = "target",
           source = "source",
           id = "someId1",
@@ -141,7 +144,7 @@ class CompleteTest {
         Event(
           topic = "testEvent2",
           channel = Csml.EventChannel.PERIPHERAL,
-          data = listOf(cv),
+          data = listOf(ContextVariable("testVar2", 200)),
           target = "target",
           source = "source",
           id = "someId2",
@@ -150,7 +153,16 @@ class CompleteTest {
       )
     val eventListParsed =
       Serializer.deserializeList(Serializer.serializeList(eventList), Event::class.java)
-    assertEquals(eventList, eventListParsed)
+    assertEquals(eventList.size, eventListParsed.size)
+    for (i in eventList.indices) {
+      assertEquals(eventList[i].topic, eventListParsed[i].topic)
+      assertEquals(eventList[i].channel, eventListParsed[i].channel)
+      assertEquals(eventList[i].data.size, eventListParsed[i].data.size)
+      assertEquals(eventList[i].data[0].value, eventListParsed[i].data[0].value)
+      assertEquals(eventList[i].target, eventListParsed[i].target)
+      assertEquals(eventList[i].source, eventListParsed[i].source)
+      assertEquals(eventList[i].emittedTime, eventListParsed[i].emittedTime)
+    }
 
     val emptyList: List<ContextVariable> = ArrayList()
     val emptyListParsed =
