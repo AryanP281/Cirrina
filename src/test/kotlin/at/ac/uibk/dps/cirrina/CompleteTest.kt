@@ -184,6 +184,11 @@ class CompleteTest {
     for (i in listOfLists.indices) {
       assertEquals(listOfLists[i], listOfListsParsed[i])
     }
+
+    val mapOfMaps = mapOf("m1" to mapOf("e1" to 1, "e2" to 2), "m2" to mapOf("e3" to 3))
+    val mapOfMapsParsed =
+      Serializer.deserializeValues(Serializer.serializeValues(mapOfMaps), Map::class.java)
+    assertEquals(mapOfMaps, mapOfMapsParsed)
   }
 
   @Test
