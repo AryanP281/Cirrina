@@ -1,6 +1,5 @@
 package at.ac.uibk.dps.cirrina
 
-import at.ac.uibk.dps.cirrina.csm.Csml
 import at.ac.uibk.dps.cirrina.csm.Csml.*
 import at.ac.uibk.dps.cirrina.data.DefaultDescriptions
 import at.ac.uibk.dps.cirrina.di.DaggerTestComponent
@@ -11,10 +10,10 @@ import at.ac.uibk.dps.cirrina.execution.`object`.Stdlib
 import at.ac.uibk.dps.cirrina.execution.provider.ContextInMemory
 import at.ac.uibk.dps.cirrina.execution.util.Serializer
 import at.ac.uibk.dps.cirrina.util.TestUtils.mockHttpServer
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Test
 import java.time.Duration
 import kotlin.time.measureTime
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Test
 
 class CompleteTest {
   @Test
@@ -76,25 +75,19 @@ class CompleteTest {
     val stringVal = "test"
     assertEquals(
       stringVal,
-      Serializer.deserializeValues<String>(
-        Serializer.serializeValues(stringVal),
-        String::class.java,
-      ),
+      Serializer.deserializeValues(Serializer.serializeValues(stringVal), String::class.java),
     )
 
     val cv = ContextVariable("testVar", 456)
     val cvParsed =
-      Serializer.deserializeValues<ContextVariable>(
-        Serializer.serializeValues(cv),
-        ContextVariable::class.java,
-      )
+      Serializer.deserializeValues(Serializer.serializeValues(cv), ContextVariable::class.java)
     assertEquals(cv.name, cvParsed!!.name)
     assertEquals(cv.value, cvParsed.value)
 
     val event =
       Event(
         topic = "testEvent",
-        channel = Csml.EventChannel.PERIPHERAL,
+        channel = EventChannel.PERIPHERAL,
         data = listOf(cv),
         target = "target",
         source = "source",
@@ -103,7 +96,7 @@ class CompleteTest {
       )
 
     val eventParsed =
-      Serializer.deserializeValues<Event>(Serializer.serializeValues(event), Event::class.java)
+      Serializer.deserializeValues(Serializer.serializeValues(event), Event::class.java)
     assertEquals(event.topic, eventParsed!!.topic)
     assertEquals(event.channel, eventParsed.channel)
     assertEquals(1, eventParsed.data.size)
@@ -113,7 +106,7 @@ class CompleteTest {
     val complexMap = mapOf("key" to listOf(1, 2, 3), "active" to true)
     @Suppress("UNCHECKED_CAST")
     val mapParsed =
-      Serializer.deserializeValues<Map<String, Any>>(
+      Serializer.deserializeValues(
         Serializer.serializeValues(complexMap),
         Map::class.java as Class<Map<String, Any>>,
       )
@@ -135,7 +128,7 @@ class CompleteTest {
       listOf(
         Event(
           topic = "testEvent1",
-          channel = Csml.EventChannel.PERIPHERAL,
+          channel = EventChannel.PERIPHERAL,
           data = listOf(ContextVariable("testVar1", 100)),
           target = "target",
           source = "source",
@@ -144,7 +137,7 @@ class CompleteTest {
         ),
         Event(
           topic = "testEvent2",
-          channel = Csml.EventChannel.PERIPHERAL,
+          channel = EventChannel.PERIPHERAL,
           data = listOf(ContextVariable("testVar2", 200)),
           target = "target",
           source = "source",
