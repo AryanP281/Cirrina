@@ -4,6 +4,7 @@ bin/
 .gradle/
 .kotlin/
 .venvs/
+.husky/
 
 build/
 
@@ -15,3 +16,5 @@ node_modules/
 
 !metrics/.gitkeep
 metrics/*
+
+commitlint.config.cjs
