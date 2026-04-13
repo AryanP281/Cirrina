@@ -100,8 +100,6 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
 
 tasks.compileKotlin { dependsOn(tasks.ktfmtFormat, tasks.named("generateForyTypes")) }
 
-// tasks.compileKotlin { dependsOn(tasks.ktfmtFormat) }
-
 tasks.test {
   useJUnitPlatform()
   jvmArgs(allRuntimeArgs)
