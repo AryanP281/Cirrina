@@ -176,6 +176,14 @@ class CompleteTest {
     for (i in testArray.indices) {
       assertEquals(testArray[i], testArrayParsed[i])
     }
+
+    val listOfLists = listOf(listOf(1, 2, 3), listOf("a", "b", "c"))
+    val listOfListsParsed =
+      Serializer.deserializeValues(Serializer.serializeValues(listOfLists), List::class.java)
+    assertEquals(listOfLists.size, listOfListsParsed.size)
+    for (i in listOfLists.indices) {
+      assertEquals(listOfLists[i], listOfListsParsed[i])
+    }
   }
 
   @Test
