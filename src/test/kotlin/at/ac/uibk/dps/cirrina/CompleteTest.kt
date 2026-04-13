@@ -14,6 +14,7 @@ import java.time.Duration
 import kotlin.time.measureTime
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class CompleteTest {
   @Test
@@ -187,6 +188,9 @@ class CompleteTest {
     val nullValueParsed: Any? =
       Serializer.deserializeValues(Serializer.serializeValues(null), Any::class.java)
     assertEquals(null, nullValueParsed)
+
+    val nonSerializable = setOf(1, 2, 3)
+    assertThrows<IllegalStateException> { Serializer.serializeValues(nonSerializable) }
   }
 
   @Test
