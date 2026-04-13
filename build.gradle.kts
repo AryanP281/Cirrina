@@ -86,8 +86,8 @@ tasks.register("generateForyTypes", Exec::class.java) {
     "--lang",
     "java",
     "-o",
-    "build/generated/fory/foryGenJava",
-    "fdl/Event.fdl",
+    "./build/generated/fory/foryGenJava",
+    "./fdl/ForyDescriptors.fdl",
   )
 }
 
@@ -98,8 +98,9 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
   }
 }
 
-// tasks.compileKotlin { dependsOn(tasks.ktfmtFormat, tasks.named("generateForyTypes")) }
-tasks.compileKotlin { dependsOn(tasks.ktfmtFormat) }
+tasks.compileKotlin { dependsOn(tasks.ktfmtFormat, tasks.named("generateForyTypes")) }
+
+// tasks.compileKotlin { dependsOn(tasks.ktfmtFormat) }
 
 tasks.test {
   useJUnitPlatform()
