@@ -23,7 +23,7 @@ object Serializer {
   fun serializeValues(obj: Any): ByteArray {
 
     // Parsing Cirrina data types into Fory-generated data types
-    var objToSerialize: Any? =
+    val objToSerialize: Any? =
       when {
         obj is ContextVariable -> parseCirrinaContextVariable(obj)
         obj is Event -> parseCirrinaEvent(obj)
@@ -97,6 +97,7 @@ object Serializer {
     return deserializedCollection
   }
 
+  @Suppress("UNCHECKED_CAST")
   private fun parseCirrinaValue(cirrinaValue: Any?): ForyDescriptorProtos.Value? {
     return when (cirrinaValue) {
       is Int -> ForyDescriptorProtos.Value.ofInteger(cirrinaValue)
@@ -121,7 +122,6 @@ object Serializer {
       null -> null
       else -> error("value type could not be converted to fory")
     }
-      as ForyDescriptorProtos.Value?
   }
 
   private fun parseCirrinaContextVariable(
