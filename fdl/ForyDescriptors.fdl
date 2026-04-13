@@ -21,7 +21,7 @@ union Value
 message ContextVariable
 {
     string name = 1;
-    Value value = 2;
+    optional Value value = 2;
 }
 
  enum EventChannel {

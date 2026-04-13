@@ -11,10 +11,10 @@ import at.ac.uibk.dps.cirrina.execution.`object`.Stdlib
 import at.ac.uibk.dps.cirrina.execution.provider.ContextInMemory
 import at.ac.uibk.dps.cirrina.execution.util.Serializer
 import at.ac.uibk.dps.cirrina.util.TestUtils.mockHttpServer
-import java.time.Duration
-import kotlin.time.measureTime
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.time.Duration
+import kotlin.time.measureTime
 
 class CompleteTest {
   @Test
@@ -88,7 +88,7 @@ class CompleteTest {
         Serializer.serializeValues(cv),
         ContextVariable::class.java,
       )
-    assertEquals(cv.name, cvParsed.name)
+    assertEquals(cv.name, cvParsed!!.name)
     assertEquals(cv.value, cvParsed.value)
 
     val event =
@@ -104,20 +104,21 @@ class CompleteTest {
 
     val eventParsed =
       Serializer.deserializeValues<Event>(Serializer.serializeValues(event), Event::class.java)
-    assertEquals(event.topic, eventParsed.topic)
+    assertEquals(event.topic, eventParsed!!.topic)
     assertEquals(event.channel, eventParsed.channel)
     assertEquals(1, eventParsed.data.size)
     assertEquals(456, eventParsed.data[0].value)
     assertEquals("source", eventParsed.source)
 
     val complexMap = mapOf("key" to listOf(1, 2, 3), "active" to true)
+    @Suppress("UNCHECKED_CAST")
     val mapParsed =
       Serializer.deserializeValues<Map<String, Any>>(
         Serializer.serializeValues(complexMap),
         Map::class.java as Class<Map<String, Any>>,
       )
     assertEquals(complexMap, mapParsed)
-    assertEquals(3, (mapParsed["key"] as List<*>).size)
+    assertEquals(3, (mapParsed!!["key"] as List<*>).size)
 
     val cvList: List<ContextVariable> =
       listOf(ContextVariable("testVar2", 456), ContextVariable("testVar2", 457))
@@ -172,7 +173,7 @@ class CompleteTest {
     val testArray = arrayOf(1, 2, 3)
     val testArrayParsed =
       Serializer.deserializeValues(Serializer.serializeValues(testArray), Array::class.java)
-    assertEquals(testArray.size, testArrayParsed.size)
+    assertEquals(testArray.size, testArrayParsed!!.size)
     for (i in testArray.indices) {
       assertEquals(testArray[i], testArrayParsed[i])
     }
@@ -180,7 +181,7 @@ class CompleteTest {
     val listOfLists = listOf(listOf(1, 2, 3), listOf("a", "b", "c"))
     val listOfListsParsed =
       Serializer.deserializeValues(Serializer.serializeValues(listOfLists), List::class.java)
-    assertEquals(listOfLists.size, listOfListsParsed.size)
+    assertEquals(listOfLists.size, listOfListsParsed!!.size)
     for (i in listOfLists.indices) {
       assertEquals(listOfLists[i], listOfListsParsed[i])
     }
@@ -189,6 +190,10 @@ class CompleteTest {
     val mapOfMapsParsed =
       Serializer.deserializeValues(Serializer.serializeValues(mapOfMaps), Map::class.java)
     assertEquals(mapOfMaps, mapOfMapsParsed)
+
+    val nullValueParsed: Any? =
+      Serializer.deserializeValues(Serializer.serializeValues(null), Any::class.java)
+    assertEquals(null, nullValueParsed)
   }
 
   @Test

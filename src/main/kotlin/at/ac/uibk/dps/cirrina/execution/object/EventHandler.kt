@@ -9,12 +9,7 @@ import io.zenoh.Session
 import io.zenoh.Zenoh
 import io.zenoh.annotations.Unstable
 import io.zenoh.bytes.ZBytes
-import io.zenoh.ext.CacheConfig
-import io.zenoh.ext.HeartbeatMode
-import io.zenoh.ext.HistoryConfig
-import io.zenoh.ext.MissDetectionConfig
-import io.zenoh.ext.RecoveryConfig
-import io.zenoh.ext.RecoveryMode
+import io.zenoh.ext.*
 import io.zenoh.keyexpr.KeyExpr
 import io.zenoh.pubsub.AdvancedPublisher
 import io.zenoh.pubsub.AdvancedSubscriber
@@ -106,7 +101,7 @@ class EventHandler : AutoCloseable {
 
   private fun handleIncoming(sample: Sample) {
     try {
-      val event = Serializer.deserializeValues<Event>(sample.payload.toBytes(), Event::class.java)
+      val event = Serializer.deserializeValues<Event>(sample.payload.toBytes(), Event::class.java)!!
       propagate(event)
     } catch (e: Exception) {
       error("failed to handle sample from '${sample.keyExpr}': ${e.message}")

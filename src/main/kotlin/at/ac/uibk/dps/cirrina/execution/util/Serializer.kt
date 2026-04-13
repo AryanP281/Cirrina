@@ -20,7 +20,7 @@ object Serializer {
 
   private val threadBuffer = ThreadLocal.withInitial { MemoryBuffer.newHeapBuffer(1024) }
 
-  fun serializeValues(obj: Any): ByteArray {
+  fun serializeValues(obj: Any?): ByteArray {
 
     // Parsing Cirrina data types into Fory-generated data types
     val objToSerialize: Any? =
@@ -58,7 +58,7 @@ object Serializer {
   }
 
   @Suppress("UNCHECKED_CAST")
-  fun <T> deserializeValues(bytes: ByteArray, deserializationClass: Class<T>): T {
+  fun <T> deserializeValues(bytes: ByteArray, deserializationClass: Class<T>): T? {
     val deserializedObj: T =
       when (deserializationClass) {
         ContextVariable::class.java ->
@@ -66,7 +66,7 @@ object Serializer {
         Event::class.java -> parseFdlEvent(fory.deserialize(bytes) as ForyDescriptorProtos.Event)
         EventChannel::class.java ->
           parseFdlEventChannel(fory.deserialize(bytes) as ForyDescriptorProtos.EventChannel)
-        else -> parseFdlValue(fory.deserialize(bytes) as ForyDescriptorProtos.Value)
+        else -> parseFdlValue(fory.deserialize(bytes) as ForyDescriptorProtos.Value?)
       }
         as T
 
@@ -163,7 +163,9 @@ object Serializer {
     return fdlEvent
   }
 
-  private fun parseFdlValue(fdlValue: ForyDescriptorProtos.Value): Any {
+  private fun parseFdlValue(fdlValue: ForyDescriptorProtos.Value?): Any? {
+    if (fdlValue == null) return null
+
     return when (fdlValue.valueCase) {
       ForyDescriptorProtos.Value.ValueCase.INTEGER -> fdlValue.integer
       ForyDescriptorProtos.Value.ValueCase.FLOAT -> fdlValue.float
@@ -178,7 +180,7 @@ object Serializer {
         fdlValue.valueList.map { parseFdlValue(it) }
       ForyDescriptorProtos.Value.ValueCase.VALUE_MAP -> {
         val fdlMap: Map<ForyDescriptorProtos.Value, ForyDescriptorProtos.Value> = fdlValue.valueMap
-        val cirrinaMap = HashMap<Any, Any>()
+        val cirrinaMap = HashMap<Any?, Any?>()
         fdlMap.forEach { entry ->
           cirrinaMap[parseFdlValue(entry.key)] = parseFdlValue(entry.value)
         }
