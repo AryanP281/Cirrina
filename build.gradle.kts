@@ -4,6 +4,7 @@ plugins {
   id("org.pkl-lang") version "0.30.2"
   kotlin("kapt") version "2.3.0"
   kotlin("jvm") version "2.3.0"
+  id("com.gradleup.shadow") version "9.2.2"
 }
 
 group = "ac.at.uibk.dps.cirrina"

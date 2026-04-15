@@ -9,12 +9,7 @@ import io.zenoh.Session
 import io.zenoh.Zenoh
 import io.zenoh.annotations.Unstable
 import io.zenoh.bytes.ZBytes
-import io.zenoh.ext.CacheConfig
-import io.zenoh.ext.HeartbeatMode
-import io.zenoh.ext.HistoryConfig
-import io.zenoh.ext.MissDetectionConfig
-import io.zenoh.ext.RecoveryConfig
-import io.zenoh.ext.RecoveryMode
+import io.zenoh.ext.*
 import io.zenoh.keyexpr.KeyExpr
 import io.zenoh.pubsub.AdvancedPublisher
 import io.zenoh.pubsub.AdvancedSubscriber
@@ -74,6 +69,7 @@ class EventHandler : AutoCloseable {
     val payload = ZBytes.from(Serializer.serialize(event))
 
     publisher.put(payload).onFailure { error("failed to send event '$event'") }
+    println("Emitted Event: ${event.topic}:${event.id}")
   }
 
   override fun close() {
@@ -107,6 +103,7 @@ class EventHandler : AutoCloseable {
   private fun handleIncoming(sample: Sample) {
     try {
       val event = Serializer.deserialize<Event>(sample.payload.toBytes())
+      println("Event handler Received event: ${event.topic}:${event.id}")
       propagate(event)
     } catch (e: Exception) {
       error("failed to handle sample from '${sample.keyExpr}': ${e.message}")

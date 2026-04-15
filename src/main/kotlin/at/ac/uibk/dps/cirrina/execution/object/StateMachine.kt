@@ -142,8 +142,10 @@ internal constructor(
   }
 
   fun pushEvent(event: Event) {
-    if (event.isValid() && !isTerminated())
+    if (event.isValid() && !isTerminated()) {
       eventChannel.trySend(event).onFailure { logger.error(it) { "failed to push event" } }
+      println("SM=$name received ${event.topic}:${event.id}")
+    }
   }
 
   private fun processEvents() =

@@ -3,11 +3,7 @@ package at.ac.uibk.dps.cirrina
 import at.ac.uibk.dps.cirrina.cirrina.di.Main
 import at.ac.uibk.dps.cirrina.cirrina.di.Run
 import at.ac.uibk.dps.cirrina.execution.graph.EventGraph
-import at.ac.uibk.dps.cirrina.execution.`object`.Context
-import at.ac.uibk.dps.cirrina.execution.`object`.EventHandler
-import at.ac.uibk.dps.cirrina.execution.`object`.Extent
-import at.ac.uibk.dps.cirrina.execution.`object`.StateMachine
-import at.ac.uibk.dps.cirrina.execution.`object`.createHierarchy
+import at.ac.uibk.dps.cirrina.execution.`object`.*
 import at.ac.uibk.dps.cirrina.execution.service.RandomServiceImplementationSelector
 import at.ac.uibk.dps.cirrina.execution.service.ServiceImplementation
 import at.ac.uibk.dps.cirrina.execution.service.ServiceImplementationSelector
