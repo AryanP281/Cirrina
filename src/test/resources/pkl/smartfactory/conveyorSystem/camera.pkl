@@ -1,0 +1,78 @@
+import "https://raw.githubusercontent.com/CollaborativeStateMachines/Cirrina/refs/heads/develop/src/main/resources/pkl/csm/csml.pkl"
+import "../events.pkl" as Events
+import "../serviceTypes.pkl" as ServiceTypes
+import "../variables.pkl" as Vars
+
+cameraFsm = new csml.StateMachine {
+  states {
+    ["idleState"] = new csml.Initial {
+      on {
+        [Events.eStartScan] {
+          to = "scanningState"
+          yields {
+            new csml.Eval { expression = "\(Vars.vIsScanning) = true" }
+          }
+        }
+      }
+    }
+
+    ["scanningState"] {
+      entry {
+        new csml.Invoke {
+          type = ServiceTypes.stTakePhoto
+        }
+        new csml.Invoke {
+          type = ServiceTypes.stScanPhoto
+          emits {
+            new csml.ConditionalEventDescription {
+              event = new csml.Internal { topic = Events.ePhotoScanned }
+            }
+          }
+        }
+      }
+
+      exit {
+        new csml.Eval { expression = "\(Vars.vIsScanning) = false" }
+      }
+
+      on {
+        [Events.ePhotoScanned] {
+          yields {
+            new csml.Match {
+              cases {
+                new csml.Case {
+                  of = "$validObject"
+                  yields {
+                    new csml.Emit { event = new csml.Internal { topic = Events.eCheckValidObject } }
+                  }
+                }
+                new csml.Case {
+                  of = "!($validObject)"
+                  yields {
+                    new csml.Emit {
+                      event = new csml.Internal { topic = Events.eCheckInvalidObject }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        [Events.eCheckValidObject] {
+          to = "idleState"
+          yields {
+            new csml.Emit { event = new csml.Internal { topic = Events.eObjectValid }}
+          }
+        }
+
+        [Events.eCheckInvalidObject] {
+          to = "idleState"
+          yields {
+            new csml.Emit { event = new csml.Internal { topic = Events.eObjectInvalid } }
+          }
+        }
+      }
+    }
+  }
+}

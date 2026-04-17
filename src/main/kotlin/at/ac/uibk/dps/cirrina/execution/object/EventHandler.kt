@@ -69,7 +69,6 @@ class EventHandler : AutoCloseable {
     val payload = ZBytes.from(Serializer.serialize(event))
 
     publisher.put(payload).onFailure { error("failed to send event '$event'") }
-    println("Emitted Event: ${event.topic}:${event.id}")
   }
 
   override fun close() {
@@ -103,7 +102,6 @@ class EventHandler : AutoCloseable {
   private fun handleIncoming(sample: Sample) {
     try {
       val event = Serializer.deserialize<Event>(sample.payload.toBytes())
-      println("Event handler Received event: ${event.topic}:${event.id}")
       propagate(event)
     } catch (e: Exception) {
       error("failed to handle sample from '${sample.keyExpr}': ${e.message}")

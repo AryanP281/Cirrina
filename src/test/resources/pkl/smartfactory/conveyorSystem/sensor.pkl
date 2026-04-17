@@ -1,0 +1,120 @@
+import
+  "https://raw.githubusercontent.com/CollaborativeStateMachines/Cirrina/refs/heads/develop/src/main/resources/pkl/csm/csml.pkl"
+
+import "../events.pkl" as Events
+import "../serviceTypes.pkl" as ServiceTypes
+import "../variables.pkl" as Vars
+
+sensorFSM = new csml.StateMachine {
+  transient {
+    ["isBeamInterrupted"] = "false"
+  }
+
+  states {
+    ["idleState"] = new csml.Initial {
+      after {
+        ["beamDetectionTimeout"] = new csml.Timeout {
+          delay = "1000"
+          triggers = new csml.Emit { event = new csml.Internal { topic = Events.eBeamDetection } }
+        }
+      }
+
+      on {
+        [Events.eBeamDetection] {
+          to = "detectingState"
+          provided = "!\(Vars.vIsUnloading) && !\(Vars.vIsScanning)"
+        }
+      }
+    }
+  }
+}
+
+startSensorFSM = (sensorFSM) {
+  states {
+    ["detectingState"] {
+      entry {
+        new csml.Invoke {
+          type = ServiceTypes.stDetectBeamStart
+          emits {
+            new csml.ConditionalEventDescription {
+              event = new csml.Internal { topic = Events.eBeamDetectionPerformed }
+            }
+          }
+        }
+      }
+
+      on {
+        [Events.eBeamDetectionPerformed] {
+          yields {
+            new csml.Eval { expression = "isBeamInterrupted = $interrupted" }
+            new csml.Emit { event = new csml.Internal { topic = Events.eCheckBeamDetection } }
+          }
+        }
+
+        [Events.eCheckBeamDetection] {
+          to = "detectedState"
+          provided = "isBeamInterrupted"
+          or = "idleState"
+        }
+      }
+    }
+
+    ["detectedState"] {
+      entry {
+        new csml.Emit { event = new csml.Internal { topic = Events.eStartScan } }
+      }
+
+      always {
+        new csml.Transition {
+          to = "idleState"
+        }
+      }
+    }
+  }
+}
+
+endSensorFSM = (sensorFSM) {
+  states {
+    ["detectingState"] {
+      entry {
+        new csml.Invoke {
+          type = ServiceTypes.stDetectBeamEnd
+          emits {
+            new csml.ConditionalEventDescription {
+              event = new csml.Internal { topic = Events.eBeamDetectionPerformed }
+            }
+          }
+        }
+      }
+
+      on {
+        [Events.eBeamDetectionPerformed] {
+          yields {
+            new csml.Eval { expression = "isBeamInterrupted = $interrupted" }
+            new csml.Emit { event = new csml.Internal { topic = Events.eCheckBeamDetection } }
+          }
+        }
+
+        [Events.eCheckBeamDetection] {
+          to = "detectedState"
+          provided = "isBeamInterrupted"
+          or = "idleState"
+        }
+      }
+    }
+
+    ["detectedState"] {
+      entry {
+        new csml.Emit {
+          event = new csml.Internal { topic = Events.eStartUnload }
+        }
+      }
+
+      always {
+        new csml.Transition {
+          to = "idleState"
+        }
+      }
+    }
+  }
+}

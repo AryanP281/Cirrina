@@ -1,8 +1,6 @@
 package at.ac.uibk.dps.cirrina.execution.service
 
-import at.ac.uibk.dps.cirrina.csm.Csml.HttpMethod
-import at.ac.uibk.dps.cirrina.csm.Csml.HttpServiceImplementationBinding
-import at.ac.uibk.dps.cirrina.csm.Csml.ServiceImplementationBinding
+import at.ac.uibk.dps.cirrina.csm.Csml.*
 import at.ac.uibk.dps.cirrina.execution.`object`.ContextVariable
 import at.ac.uibk.dps.cirrina.execution.util.Serializer
 import com.google.protobuf.InvalidProtocolBufferException
@@ -12,7 +10,6 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.util.concurrent.Executors
-import kotlin.collections.isEmpty
 import kotlinx.coroutines.future.await
 
 abstract class ServiceImplementation(val name: String, val isLocal: Boolean) {
@@ -82,7 +79,7 @@ class HttpServiceImplementation(
 
     return try {
       Serializer.deserialize(body)
-    } catch (_: InvalidProtocolBufferException) {
+    } catch (msg: InvalidProtocolBufferException) {
       error("unexpected http service response format")
     }
   }

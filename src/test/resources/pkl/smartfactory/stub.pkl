@@ -1,0 +1,21 @@
+import "https://raw.githubusercontent.com/CollaborativeStateMachines/Cirrina/refs/heads/develop/src/main/resources/pkl/csm/csml.pkl"
+import "events.pkl" as Events
+
+stubFSM = new csml.StateMachine {
+  states {
+    ["s1"] = new csml.Initial {
+      on {
+        [Events.eJobDone] {
+          to = "s2"
+          yields {
+            new csml.Eval { expression = "stub_job_done_received = true"}
+          }
+        }
+      }
+    }
+
+    ["s2"] = new csml.Terminal {
+
+    }
+  }
+}

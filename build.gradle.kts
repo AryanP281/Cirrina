@@ -97,6 +97,8 @@ tasks.test {
   testLogging { showStandardStreams = true }
 }
 
+tasks.withType<Test>().configureEach { maxParallelForks = 1 }
+
 tasks.withType<JavaExec> { jvmArgs(allRuntimeArgs) }
 
 tasks.distZip { archiveFileName.set("${project.name}.zip") }
