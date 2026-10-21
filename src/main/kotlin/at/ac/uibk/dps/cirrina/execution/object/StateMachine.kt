@@ -5,13 +5,8 @@ import at.ac.uibk.dps.cirrina.Runtime
 import at.ac.uibk.dps.cirrina.csm.Csml.EventChannel
 import at.ac.uibk.dps.cirrina.execution.`object`.StateMachine.Factory
 import at.ac.uibk.dps.cirrina.execution.service.ServiceImplementationSelector
-import at.ac.uibk.dps.cirrina.spec.Action
-import at.ac.uibk.dps.cirrina.spec.ContextVariable
-import at.ac.uibk.dps.cirrina.spec.Emit
-import at.ac.uibk.dps.cirrina.spec.Event
-import at.ac.uibk.dps.cirrina.spec.Reset
+import at.ac.uibk.dps.cirrina.spec.*
 import at.ac.uibk.dps.cirrina.spec.StateMachine as StateMachineSpecification
-import at.ac.uibk.dps.cirrina.spec.Timeout
 import com.codahale.metrics.MetricRegistry
 import com.codahale.metrics.Timer
 import dagger.assisted.Assisted
@@ -122,6 +117,10 @@ internal constructor(
 
   private val processEventTimer: Timer = metricRegistry.timer("processEvent.time")
 
+  private val eventHandlingTimer: Timer = metricRegistry.timer("event.handling")
+
+  private val perEventTimers: HashMap<String, ArrayList<Timer>> = hashMapOf()
+
   init {
     val transientContext =
       Context.empty().apply {
@@ -133,6 +132,16 @@ internal constructor(
 
     extent = (parent?.extent ?: runtimeExtent).extend(transientContext)
     eventExtent = extent.extend(eventContext)
+
+    for (inputEvent in specification.inputEvents) {
+      val eventTimers =
+        arrayListOf<Timer>(
+          metricRegistry.timer("$inputEvent.event.latency"),
+          metricRegistry.timer("$inputEvent.processEvent.time"),
+          metricRegistry.timer("$inputEvent.event.handling"),
+        )
+      perEventTimers[inputEvent] = eventTimers
+    }
   }
 
   fun start(parentContext: Job): Job {
@@ -190,11 +199,27 @@ internal constructor(
         val deltaNanos = (nowNanos - event.emittedTime).coerceAtLeast(0L)
 
         eventTimer.update(deltaNanos, TimeUnit.NANOSECONDS)
+        perEventTimers[event.topic]?.get(0)?.update(deltaNanos, TimeUnit.NANOSECONDS)
       }
 
       handleEvent(event)?.let { transition -> step(transition) }
 
       if (event.channel == EventChannel.INTERNAL) stateMachineEventHandler.propagateToNested(event)
+    }
+
+    if (
+      (event.channel == EventChannel.EXTERNAL || event.channel == EventChannel.PERIPHERAL) &&
+        event.source != name
+    ) {
+      val now = Clock.System.now()
+      val nowNanos = (now.epochSeconds * 1_000_000_000L) + now.nanosecondsOfSecond
+      val deltaNanos = (nowNanos - event.emittedTime).coerceAtLeast(0L)
+
+      eventHandlingTimer.update(deltaNanos, TimeUnit.NANOSECONDS)
+      perEventTimers[event.topic]?.let { timers ->
+        timers[1].update(delta.toJavaDuration())
+        timers[2].update(deltaNanos, TimeUnit.NANOSECONDS)
+      }
     }
 
     processEventTimer.update(delta.toJavaDuration())
